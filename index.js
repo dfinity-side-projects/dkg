@@ -1,63 +1,73 @@
-const bls = require('bls-lib')
-const shuffle = require('array-shuffle')
-
-bls.onModuleInit(() => {
-  bls.init()
-  const numOfPlayers = 5
-  const threshold = 3
-
-  const secretKeyShares = Array(numOfPlayers)
-  const publicKeys = []
-  const ids = []
-
-  // generate ids
-  for (let i = 0; i < numOfPlayers; i++) {
-    const id = bls.secretKey()
-    bls.secretKeySetByCSPRNG(id)
-    ids[i] = id
-    secretKeyShares[i] = []
+module.exports = class Group {
+  constuctor (bls, ids, id, threshold) {
+    this.bls = bls
+    this.ids = ids
+    this.id = id
+    this.threshold = threshold
   }
 
-  // set up master key share
-  for (let i = 0; i < numOfPlayers; i++) {
-    const secretKeyVec = []
-    for (let i = 0; i < threshold; i++) {
-      const sk = bls.secretKey()
-      bls.secretKeySetByCSPRNG(sk)
-      secretKeyVec.push(sk)
+  setup () {
+    const secretKeyVector = []
+    const verificationVector = []
+    const secretKeyShares = []
+
+    for (let i = 0; i < this.threshold; i++) {
+      const sk = this.bls.secretKey()
+      this.bls.secretKeySetByCSPRNG(sk)
+      secretKeyVector.push(sk)
+
+      const pk = this.bls.publicKey()
+      this.bls.getPublicKey(pk, sk)
+      verificationVector.push(pk)
     }
 
-    // generate secert key shares for every one
-    for (let q = 0; q < numOfPlayers; q++) {
-      const sk = bls.secretKey()
-      bls.secretKeyShare(sk, secretKeyVec, ids[q])
-      secretKeyShares[q].push(sk)
+    for (const id of this.ids) {
+      const sk = this.bls.secretKey()
+      this.bls.secretKeyShare(sk, secretKeyVector, id)
+      secretKeyShares.push({
+        sk: sk,
+        toId: id
+      })
+    }
+
+    return {
+      secretKeyVector: secretKeyVector,
+      verificationVector: verificationVector,
+      secretKeyShares: secretKeyShares
     }
   }
 
-  for (let i = 0; i < numOfPlayers; i++) {
-    const mySecretKey = secretKeyShares[i].pop()
-    const mySecretKeyShares = secretKeyShares[i]
-    mySecretKeyShares.forEach(sk => {
-      bls.secretKeyAdd(mySecretKey, sk)
+  verifyShare (fromId, share, vvec) {
+    const pk = this.bls.publicKey()
+    this.bls.publicKeyShare(pk, vvec, this.id)
+
+    const pk2 = this.bls.publicKey()
+    this.bls.getPublicKey(pk2, share.sk)
+
+    return this.bls.publicKeyIsEqual(pk, pk2)
+  }
+
+  recoverSecretKeyShare (secretKeyShares) {
+    const skShare = secretKeyShares.pop()
+    secretKeyShares.forEach(share => {
+      this.bls.secretKeyAdd(skShare, share)
     })
 
-    const pk = bls.publicKey()
-    bls.getPublicKey(pk, mySecretKey)
+    const pk = this.bls.publicKey()
+    this.bls.getPublicKey(pk, skShare)
 
-    publicKeys.push({pk: pk, id: i})
+    return {
+      secretKeyShare: skShare,
+      publicKeyShare: pk
+    }
   }
 
-  // recover public key
-  for (let i = 0; i < 3; i++) {
-    const shareArray = shuffle(publicKeys).slice(0, threshold)
-    const pks = shareArray.map(s => s.pk)
-    const sids = shareArray.map(s => ids[s.id])
-    const pk = bls.publicKey()
+  recoverGroupPublicKey (publicKeyShares) {
+    const pks = publicKeyShares.map(s => s.pk)
+    const sids = publicKeyShares.map(s => s.id)
+    const pk = this.bls.publicKey()
 
-    bls.publicKeyRecover(pk, pks, sids)
-
-    const publicKey = bls.publicKeySerialize(pk)
-    console.log(Buffer.from(publicKey).toString('hex'))
+    this.bls.publicKeyRecover(pk, pks, sids)
+    return pk
   }
-})
+}
