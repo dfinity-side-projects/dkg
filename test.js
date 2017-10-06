@@ -1,84 +1,60 @@
 const bls = require('bls-lib')
 const shuffle = require('array-shuffle')
+const dkg = require('./')
 
 bls.onModuleInit(() => {
   bls.init()
-  const numOfPlayers = 5
   const threshold = 3
 
-  const secretKeyShares = Array(numOfPlayers)
-  const publicKeys = []
-  const ids = []
-  const verificationVecs = []
-
-  // generate ids
-  for (let i = 0; i < numOfPlayers; i++) {
-    const id = bls.secretKey()
-    bls.secretKeySetByCSPRNG(id)
-    ids[i] = id
-    secretKeyShares[i] = []
-  }
+  const players = []
+  const ids = [0, 1, 2, 3, 4].map(i => Buffer.from([i]))
 
   // set up master key share
-  for (let i = 0; i < numOfPlayers; i++) {
-    const secretKeyVec = []
-    const verVec = []
-    for (let i = 0; i < threshold; i++) {
-      const sk = bls.secretKey()
-      bls.secretKeySetByCSPRNG(sk)
-      secretKeyVec.push(sk)
-
-      const pk = bls.publicKey()
-      bls.getPublicKey(pk, sk)
-      verVec.push(pk)
-    }
-    verificationVecs.push(verVec)
-
-    // generate secert key shares for every one
-    for (let q = 0; q < numOfPlayers; q++) {
-      const sk = bls.secretKey()
-      bls.secretKeyShare(sk, secretKeyVec, ids[q])
-      secretKeyShares[q].push({
-        sk: sk,
-        id: i
-      })
-    }
+  for (let i = 0; i < ids.length; i++) {
+    const player = dkg.setup(bls, ids, threshold)
+    player.id = i
+    player.recievedShares = []
+    players.push(player)
   }
 
-  for (let i = 0; i < numOfPlayers; i++) {
-    const mySecretKeyShares = secretKeyShares[i]
-    // verify the shares
-    mySecretKeyShares.forEach(share => {
-      const pk = bls.publicKey()
-      const vvec = verificationVecs[share.id]
-      bls.publicKeyShare(pk, vvec, ids[i])
+  // all the plays public post their verification vectors
+  const verificationVecs = players.map(player => player.verificationVector)
 
-      const pk2 = bls.publicKey()
-      bls.getPublicKey(pk2, share.sk)
-
-      console.log(bls.publicKeyIsEqual(pk, pk2))
+  // ever player sends there shares to all the players
+  players.forEach(player => {
+    player.secretKeyShares.forEach(skShare => {
+      const to = skShare.to[0]
+      skShare.from = player.id
+      players[to].recievedShares.push(skShare)
     })
+  })
 
-    const mySecretKey = mySecretKeyShares.pop().sk
-    mySecretKeyShares.forEach(share => {
-      bls.secretKeyAdd(mySecretKey, share.sk)
+  // verify the shares
+  players.forEach(player => {
+    player.recievedShares.forEach(rShare => {
+      const fromId = rShare.from
+      const vvec = verificationVecs[fromId]
+      const valid = dkg.verifyShare(bls, ids[player.id], rShare.secretKey, vvec)
+      console.log(valid)
     })
+  })
 
-    const pk = bls.publicKey()
-    bls.getPublicKey(pk, mySecretKey)
-
-    publicKeys.push({pk: pk, id: i})
-  }
+  // recover the share for the group
+  players.forEach(player => {
+    player.share = dkg.keyShareRecover(bls, player.recievedShares)
+  })
 
   // recover public key
-  for (let i = 0; i < 3; i++) {
-    const shareArray = shuffle(publicKeys).slice(0, threshold)
-    const pks = shareArray.map(s => s.pk)
-    const sids = shareArray.map(s => ids[s.id])
-    const pk = bls.publicKey()
+  for (let i = 0; i < 6; i++) {
+    const splayers = shuffle(players.slice(0))
+    const shares = splayers.map(player => {
+      return {
+        publicKey: player.share.publicKey,
+        id: ids[player.id]
+      }
+    })
 
-    bls.publicKeyRecover(pk, pks, sids)
-
+    const pk = dkg.publicKeyRecover(bls, shares, threshold)
     const publicKey = bls.publicKeySerialize(pk)
     console.log(Buffer.from(publicKey).toString('hex'))
   }
