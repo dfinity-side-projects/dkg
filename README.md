@@ -6,7 +6,7 @@
 
 [![js-standard-style](https://cdn.rawgit.com/feross/standard/master/badge.svg)](https://github.com/feross/standard)  
 
-Distributed key generation primitives in JS
+[Distributed key generation](https://en.wikipedia.org/wiki/Distributed_key_generation) primitives in JS
 
 # INSTALL
 `npm install dkg`
