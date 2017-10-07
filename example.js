@@ -41,8 +41,6 @@ bls.onModuleInit(() => {
 
   // this stores an array of verifcation vectors. One for each Member
   const vvecs = []
-  // this stores an array of secertKey contrubutions. One for each member
-  const skContributions = []
 
   // each member need to first create a one verification vector and a secert key
   // contrubution for every other member in the group (inculding itself!)
@@ -51,7 +49,6 @@ bls.onModuleInit(() => {
     // the verification vector should be posted publically so that everyone
     // in the group can see it
     vvecs.push(verificationVector)
-    skContributions.push(secretKeyContribution)
 
     // Each secert sk contrubution is the encrypted an send to the member to
     // the member it is for.
