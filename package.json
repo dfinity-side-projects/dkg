@@ -1,17 +1,37 @@
 {
-  "name": "bls-test",
-  "version": "1.0.0",
-  "description": "",
+  "name": "dkg",
+  "version": "0.0.0",
+  "description": "distributed key generation in JS",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "coveralls": "npm run coverage && nyc report --reporter=text-lcov | coveralls",
+    "coverage": "nyc npm test",
+    "lint": "standard",
+    "test": "node ./test/index.js",
+    "build:docs": "documentation build --github  -f md ./index.js > ./docs/index.md"
   },
-  "author": "",
-  "license": "ISC",
-  "dependencies": {
-    "array-shuffle": "^1.0.1"
-  },
+  "keywords": [
+    "dkg",
+    "crypto"
+  ],
+  "author": "mjbecze <mjbecze@gmail.com>",
+  "license": "MPL-2.0",
+  "dependencies": {},
   "devDependencies": {
-    "tape": "^4.8.0"
-  }
+    "array-shuffle": "^1.0.1",
+    "bls-lib": "^0.1.0",
+    "documentation": "^5.2.0",
+    "istanbul": "^0.4.1",
+    "nyc": "^11.2.1",
+    "standard": "^10.0.0",
+    "tape": "^4.0.3"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git@github.com:wanderer/dkg.git"
+  },
+  "bugs": {
+    "url": "https://github.com/wanderer/dkg/issues"
+  },
+  "homepage": "https://github.com/wanderer/dkg"
 }
