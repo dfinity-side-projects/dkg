@@ -19,4 +19,3 @@ Distributed key generation primitives in JS
 
 # LICENSE
 [MPL-2.0](https://tldrlegal.com/license/mozilla-public-license-2.0-(mpl-2))
-[![Greenkeeper badge](https://badges.greenkeeper.io/wanderer/dkg.svg)](https://greenkeeper.io/)
