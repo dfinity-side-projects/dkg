@@ -19,7 +19,7 @@
   "dependencies": {},
   "devDependencies": {
     "array-shuffle": "^1.0.1",
-    "bls-lib": "^0.2.0",
+    "bls-lib": "^0.3.0",
     "coveralls": "^3.0.0",
     "documentation": "^5.2.0",
     "istanbul": "^0.4.1",
