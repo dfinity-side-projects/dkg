@@ -10,12 +10,63 @@
 exports.generateContribution = function (bls, ids, threshold) {
   // this id's verification vector
   const vvec = []
-  // this id's secert keys
+  // this id's secret keys
   const svec = []
-  // this id's sk contrubutions shares
+  // this id's sk contributions shares
   const skContribution = []
   // generate a sk and vvec
   for (let i = 0; i < threshold; i++) {
+    const sk = bls.secretKey()
+    bls.secretKeySetByCSPRNG(sk)
+    svec.push(sk)
+
+    const pk = bls.publicKey()
+    bls.getPublicKey(pk, sk)
+    vvec.push(pk)
+  }
+
+  // generate key shares
+  for (const id of ids) {
+    const sk = bls.secretKey()
+    bls.secretKeyShare(sk, svec, id)
+    skContribution.push(sk)
+  }
+
+  svec.forEach(s => bls.free(s))
+
+  return {
+    verificationVector: vvec,
+    secretKeyContribution: skContribution
+  }
+}
+
+/**
+ * generates a members contribution to the DKG, ensuring the secret is null
+ * @param {Object} bls - an instance of [bls-lib](https://github.com/wanderer/bls-lib)
+ * @param {Array<Number>} ids - an array of pointers containing the ids of the members of the groups
+ * @param {Number} threshold - the threshold number of members needed to sign on a message to
+ * produce the groups signature
+ * @returns {Object} the object contains `verificationVector` which is an array of public key pointers
+ * and `secretKeyContribution` which is an array of secret key pointers
+ */
+exports.generateZeroContribution = function (bls, ids, threshold) {
+  // this id's verification vector
+  const vvec = []
+  // this id's secret keys
+  const svec = []
+  // this id's sk contributions shares
+  const skContribution = []
+
+  const zeroArray = Buffer.alloc(32)
+  const zeroSK = bls.secretKeyImport(zeroArray)
+  svec.push(zeroSK)
+
+  const zeroPK = bls.publicKey()
+  bls.getPublicKey(zeroPK, zeroSK)
+  vvec.push(zeroPK)
+
+  // generate a sk and vvec
+  for (let i = 1; i < threshold; i++) {
     const sk = bls.secretKey()
     bls.secretKeySetByCSPRNG(sk)
     svec.push(sk)
