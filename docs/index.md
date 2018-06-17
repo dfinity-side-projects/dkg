@@ -2,63 +2,125 @@
 
 ### Table of Contents
 
--   [generateContribution](#generatecontribution)
--   [addContributionShares](#addcontributionshares)
--   [verifyContributionShare](#verifycontributionshare)
--   [addVerificationVectors](#addverificationvectors)
+-   [generateContribution][1]
+    -   [Parameters][2]
+-   [generateZeroContribution][3]
+    -   [Parameters][4]
+-   [addContributionShares][5]
+    -   [Parameters][6]
+-   [verifyContributionShare][7]
+    -   [Parameters][8]
+-   [addVerificationVectors][9]
+    -   [Parameters][10]
 
 ## generateContribution
 
-[index.js:10-41](https://github.com/wanderer/dkg/blob/1f82d1133c4dd11b5de8fa00ccd527ea23eaf901/index.js#L10-L41 "Source code on GitHub")
+[index.js:10-41][11]
 
 generates a members contribution to the DKG
 
-**Parameters**
+### Parameters
 
--   `bls` **[Object](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Object)** an instance of [bls-lib](https://github.com/wanderer/bls-lib)
--   `ids` **[Array](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array)&lt;[Number](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Number)>** an array of pointers containing the ids of the members of the groups
--   `threshold` **[Number](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Number)** the threshold number of members needed to sign on a message to
+-   `bls` **[Object][12]** an instance of [bls-lib][13]
+-   `ids` **[Array][14]&lt;[Number][15]>** an array of pointers containing the ids of the members of the groups
+-   `threshold` **[Number][15]** the threshold number of members needed to sign on a message to
     produce the groups signature
 
-Returns **[Object](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Object)** the object contains `verificationVector` which is an array of public key pointers
+Returns **[Object][12]** the object contains `verificationVector` which is an array of public key pointers
+and `secretKeyContribution` which is an array of secret key pointers
+
+## generateZeroContribution
+
+[index.js:52-92][16]
+
+generates a members contribution to the DKG, ensuring the secret is null
+
+### Parameters
+
+-   `bls` **[Object][12]** an instance of [bls-lib][13]
+-   `ids` **[Array][14]&lt;[Number][15]>** an array of pointers containing the ids of the members of the groups
+-   `threshold` **[Number][15]** the threshold number of members needed to sign on a message to
+    produce the groups signature
+
+Returns **[Object][12]** the object contains `verificationVector` which is an array of public key pointers
 and `secretKeyContribution` which is an array of secret key pointers
 
 ## addContributionShares
 
-[index.js:49-56](https://github.com/wanderer/dkg/blob/1f82d1133c4dd11b5de8fa00ccd527ea23eaf901/index.js#L49-L56 "Source code on GitHub")
+[index.js:100-107][17]
 
 Adds secret key contribution together to produce a single secret key
 
-**Parameters**
+### Parameters
 
--   `bls` **[Object](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Object)** an instance of [bls-lib](https://github.com/wanderer/bls-lib)
--   `secretKeyShares` **[Array](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array)&lt;[Number](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Number)>** an array of pointer to secret keys to add
+-   `bls` **[Object][12]** an instance of [bls-lib][13]
+-   `secretKeyShares` **[Array][14]&lt;[Number][15]>** an array of pointer to secret keys to add
 
-Returns **[Number](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Number)** a pointer to the resulting secret key
+Returns **[Number][15]** a pointer to the resulting secret key
 
 ## verifyContributionShare
 
-[index.js:67-80](https://github.com/wanderer/dkg/blob/1f82d1133c4dd11b5de8fa00ccd527ea23eaf901/index.js#L67-L80 "Source code on GitHub")
+[index.js:118-131][18]
 
 Verifies a contribution share
 
-**Parameters**
+### Parameters
 
--   `bls` **[Object](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Object)** an instance of [bls-lib](https://github.com/wanderer/bls-lib)
--   `id` **[Number](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Number)** a pointer to the id of the member verifiing the contribution
--   `contribution` **[Number](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Number)** a pointer to the secret key contribution
--   `vvec` **[Array](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array)&lt;[Number](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Number)>** an array of pointers to public keys which is
+-   `bls` **[Object][12]** an instance of [bls-lib][13]
+-   `id` **[Number][15]** a pointer to the id of the member verifiing the contribution
+-   `contribution` **[Number][15]** a pointer to the secret key contribution
+-   `vvec` **[Array][14]&lt;[Number][15]>** an array of pointers to public keys which is
     the verification vector of the sender of the contribution
 
-Returns **[Boolean](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Boolean)** 
+Returns **[Boolean][19]** 
 
 ## addVerificationVectors
 
-[index.js:87-101](https://github.com/wanderer/dkg/blob/1f82d1133c4dd11b5de8fa00ccd527ea23eaf901/index.js#L87-L101 "Source code on GitHub")
+[index.js:138-152][20]
 
 Adds an array of verification vectors together to produce the groups verification vector
 
-**Parameters**
+### Parameters
 
--   `bls` **[Object](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Object)** an instance of [bls-lib](https://github.com/wanderer/bls-lib)
--   `vvecs` **[Array](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array)&lt;[Array](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array)&lt;[Number](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Number)>>** an array containing all the groups verifciation vectors
+-   `bls` **[Object][12]** an instance of [bls-lib][13]
+-   `vvecs` **[Array][14]&lt;[Array][14]&lt;[Number][15]>>** an array containing all the groups verifciation vectors
+
+[1]: #generatecontribution
+
+[2]: #parameters
+
+[3]: #generatezerocontribution
+
+[4]: #parameters-1
+
+[5]: #addcontributionshares
+
+[6]: #parameters-2
+
+[7]: #verifycontributionshare
+
+[8]: #parameters-3
+
+[9]: #addverificationvectors
+
+[10]: #parameters-4
+
+[11]: https://github.com/wanderer/dkg/blob/6fff33d3e3b08ffbbfc0e3a9ef448bd8dfab6d68/index.js#L10-L41 "Source code on GitHub"
+
+[12]: https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Object
+
+[13]: https://github.com/wanderer/bls-lib
+
+[14]: https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Array
+
+[15]: https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Number
+
+[16]: https://github.com/wanderer/dkg/blob/6fff33d3e3b08ffbbfc0e3a9ef448bd8dfab6d68/index.js#L52-L92 "Source code on GitHub"
+
+[17]: https://github.com/wanderer/dkg/blob/6fff33d3e3b08ffbbfc0e3a9ef448bd8dfab6d68/index.js#L100-L107 "Source code on GitHub"
+
+[18]: https://github.com/wanderer/dkg/blob/6fff33d3e3b08ffbbfc0e3a9ef448bd8dfab6d68/index.js#L118-L131 "Source code on GitHub"
+
+[19]: https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Boolean
+
+[20]: https://github.com/wanderer/dkg/blob/6fff33d3e3b08ffbbfc0e3a9ef448bd8dfab6d68/index.js#L138-L152 "Source code on GitHub"
