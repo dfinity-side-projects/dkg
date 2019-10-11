@@ -16,74 +16,22 @@ exports.generateContribution = function (bls, ids, threshold) {
   const skContribution = []
   // generate a sk and vvec
   for (let i = 0; i < threshold; i++) {
-    const sk = bls.secretKey()
-    bls.secretKeySetByCSPRNG(sk)
+    const sk = new bls.SecretKey()
+    sk.setByCSPRNG(sk)
     svec.push(sk)
 
-    const pk = bls.publicKey()
-    bls.getPublicKey(pk, sk)
+    const pk = sk.getPublicKey()
     vvec.push(pk)
   }
 
   // generate key shares
   for (const id of ids) {
-    const sk = bls.secretKey()
-    bls.secretKeyShare(sk, svec, id)
+    const sk = new bls.SecretKey()
+    sk.share(svec, id)
     skContribution.push(sk)
   }
 
-  svec.forEach(s => bls.free(s))
-
-  return {
-    verificationVector: vvec,
-    secretKeyContribution: skContribution
-  }
-}
-
-/**
- * generates a members contribution to the DKG, ensuring the secret is null
- * @param {Object} bls - an instance of [bls-lib](https://github.com/wanderer/bls-lib)
- * @param {Array<Number>} ids - an array of pointers containing the ids of the members of the groups
- * @param {Number} threshold - the threshold number of members needed to sign on a message to
- * produce the groups signature
- * @returns {Object} the object contains `verificationVector` which is an array of public key pointers
- * and `secretKeyContribution` which is an array of secret key pointers
- */
-exports.generateZeroContribution = function (bls, ids, threshold) {
-  // this id's verification vector
-  const vvec = []
-  // this id's secret keys
-  const svec = []
-  // this id's sk contributions shares
-  const skContribution = []
-
-  const zeroArray = Buffer.alloc(32)
-  const zeroSK = bls.secretKeyImport(zeroArray)
-  svec.push(zeroSK)
-
-  const zeroPK = bls.publicKey()
-  bls.getPublicKey(zeroPK, zeroSK)
-  vvec.push(zeroPK)
-
-  // generate a sk and vvec
-  for (let i = 1; i < threshold; i++) {
-    const sk = bls.secretKey()
-    bls.secretKeySetByCSPRNG(sk)
-    svec.push(sk)
-
-    const pk = bls.publicKey()
-    bls.getPublicKey(pk, sk)
-    vvec.push(pk)
-  }
-
-  // generate key shares
-  for (const id of ids) {
-    const sk = bls.secretKey()
-    bls.secretKeyShare(sk, svec, id)
-    skContribution.push(sk)
-  }
-
-  svec.forEach(s => bls.free(s))
+  svec.forEach(s => s.clear())
 
   return {
     verificationVector: vvec,
@@ -97,11 +45,11 @@ exports.generateZeroContribution = function (bls, ids, threshold) {
  * @param {Array<Number>} secretKeyShares - an array of pointer to secret keys to add
  * @returns {Number} a pointer to the resulting secret key
  */
-exports.addContributionShares = function (bls, secretKeyShares) {
+exports.addContributionShares = function (secretKeyShares) {
   const first = secretKeyShares.pop()
   secretKeyShares.forEach(sk => {
-    bls.secretKeyAdd(first, sk)
-    bls.free(sk)
+    first.add(sk)
+    sk.clear()
   })
   return first
 }
@@ -116,16 +64,15 @@ exports.addContributionShares = function (bls, secretKeyShares) {
  * @returns {Boolean}
  */
 exports.verifyContributionShare = function (bls, id, contribution, vvec) {
-  const pk1 = bls.publicKey()
-  bls.publicKeyShare(pk1, vvec, id)
+  const pk1 = new bls.PublicKey()
+  pk1.share(vvec, id)
 
-  const pk2 = bls.publicKey()
-  bls.getPublicKey(pk2, contribution)
+  const pk2 = contribution.getPublicKey()
 
-  const isEqual = bls.publicKeyIsEqual(pk1, pk2)
+  const isEqual = pk1.isEqual(pk2)
 
-  bls.free(pk1)
-  bls.free(pk2)
+  pk1.clear()
+  pk2.clear()
 
   return Boolean(isEqual)
 }
@@ -135,7 +82,7 @@ exports.verifyContributionShare = function (bls, id, contribution, vvec) {
  * @param {Object} bls - an instance of [bls-lib](https://github.com/wanderer/bls-lib)
  * @param {Array<Array<Number>>} vvecs - an array containing all the groups verifciation vectors
  */
-exports.addVerificationVectors = function (bls, vvecs) {
+exports.addVerificationVectors = function (vvecs) {
   const groupsVvec = []
   vvecs.forEach(vvec => {
     vvec.forEach((pk2, i) => {
@@ -143,8 +90,8 @@ exports.addVerificationVectors = function (bls, vvecs) {
       if (!pk1) {
         groupsVvec[i] = pk2
       } else {
-        bls.publicKeyAdd(pk1, pk2)
-        bls.free(pk2)
+        pk1.add(pk2)
+        pk2.clear()
       }
     })
   })
