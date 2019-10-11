@@ -1,15 +1,14 @@
 const tape = require('tape')
-const bls = require('bls-lib')
+const bls = require('bls-wasm')
 const threshold = 4
 const dkg = require('../')
 
-bls.onModuleInit(() => {
-  bls.init()
+bls.init().then(() => {
   tape('dkg', t => {
     // create the ids
     const ids = [0, 1, 2, 3, 4, 5, 6].map(id => {
-      const sk = bls.secretKey()
-      bls.hashToSecretKey(sk, Buffer.from([id]))
+      const sk = new bls.SecretKey()
+      sk.setHashOf(Buffer.from([id]))
       return sk
     })
 
@@ -40,30 +39,29 @@ bls.onModuleInit(() => {
       skContributions.forEach(skvec => {
         shares.push(skvec[i])
       })
-      const sk = dkg.addContributionShares(bls, shares)
+      const sk = dkg.addContributionShares(shares)
       groupsSks[i] = sk
     })
 
     // add together the all vvecs
-    const groupsVvec = dkg.addVerificationVectors(bls, vvecs)
+    const groupsVvec = dkg.addVerificationVectors(vvecs)
 
     // derive the public key for each id from there secert key share
     const groupsPks = []
     ids.forEach((id, i) => {
-      const pk = bls.publicKey()
-      bls.publicKeyShare(pk, groupsVvec, id)
+      const pk = new bls.PublicKey()
+      pk.share(groupsVvec, id)
       groupsPks.push(pk)
 
       const sk = groupsSks[i]
-      const pk2 = bls.publicKey()
-      bls.getPublicKey(pk2, sk)
-      const equal = bls.publicKeyIsEqual(pk, pk2)
+      const pk2 = sk.getPublicKey()
+      const equal = pk.isEqual(pk2)
       t.true(equal, 'public key derived from groups vvec should equal pk from secert share')
     })
 
-    const groupsPk = bls.publicKey()
-    bls.publicKeyRecover(groupsPk, groupsPks.slice(0, threshold), ids.slice(0, threshold))
-    const equal = bls.publicKeyIsEqual(groupsPk, groupsVvec[0])
+    const groupsPk = new bls.PublicKey()
+    groupsPk.recover(groupsPks.slice(0, threshold), ids.slice(0, threshold))
+    const equal = groupsPk.isEqual(groupsVvec[0])
     t.true(equal, 'groups public key should equal pk derived from pk shares')
     t.end()
   })
