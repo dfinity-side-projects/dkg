@@ -1,14 +1,11 @@
-# SYNOPSIS 
-[![NPM Package](https://img.shields.io/npm/v/dkg.svg?style=flat-square)](https://www.npmjs.org/package/dkg)
-[![Build Status](https://img.shields.io/travis/wanderer/dkg.svg?branch=master&style=flat-square)](https://travis-ci.org/wanderer/dkg)
-[![Coverage Status](https://img.shields.io/coveralls/wanderer/dkg.svg?style=flat-square)](https://coveralls.io/r/wanderer/dkg)
 
-[![js-standard-style](https://cdn.rawgit.com/feross/standard/master/badge.svg)](https://github.com/feross/standard)  
+# distributed key generation
 
-[Distributed key generation](https://en.wikipedia.org/wiki/Distributed_key_generation) primitives in JS. With this you can create a "group" with a threshold that has a shared secert and a public key for the group. This group can then sign on messages and when the threshold number of members sign anyone can create recover the groups signture on the message which can be validated against the groups public key. The signiture is also determinist no matter which members on the message.
+## **WIP**
 
-# INSTALL
-`npm install dkg`
+This is a fork of [dfinity/dkg](https://github.com/dfinity/dkg) which uses [herumi/bls-wasm](https://github.com/herumi/bls-wasm) instead of [dfinity/js-bls-lib](https://github.com/dfinity/js-bls-lib)
+
+The API is almost the same, except some methods no longer require passing in an instance of the bls library,
 
 # USAGE
 [./example.js](./example.js)
