@@ -15,13 +15,13 @@
 
 ## generateContribution
 
-[index.js:10-41][11]
+[index.js:10-40][11]
 
 generates a members contribution to the DKG
 
 ### Parameters
 
--   `bls` **[Object][12]** an instance of [bls-lib][13]
+-   `bls` **[Object][12]** an instance of [bls-wasm][13]
 -   `ids` **[Array][14]&lt;[Number][15]>** an array of pointers containing the ids of the members of the groups
 -   `threshold` **[Number][15]** the threshold number of members needed to sign on a message to
     produce the groups signature
@@ -31,13 +31,13 @@ and `secretKeyContribution` which is an array of secret key pointers
 
 ## generateZeroContribution
 
-[index.js:52-92][16]
+[index.js:51-90][16]
 
 generates a members contribution to the DKG, ensuring the secret is null
 
 ### Parameters
 
--   `bls` **[Object][12]** an instance of [bls-lib][13]
+-   `bls` **[Object][12]** an instance of [bls-wasm][13]
 -   `ids` **[Array][14]&lt;[Number][15]>** an array of pointers containing the ids of the members of the groups
 -   `threshold` **[Number][15]** the threshold number of members needed to sign on a message to
     produce the groups signature
@@ -47,26 +47,25 @@ and `secretKeyContribution` which is an array of secret key pointers
 
 ## addContributionShares
 
-[index.js:100-107][17]
+[index.js:97-104][17]
 
 Adds secret key contribution together to produce a single secret key
 
 ### Parameters
 
--   `bls` **[Object][12]** an instance of [bls-lib][13]
 -   `secretKeyShares` **[Array][14]&lt;[Number][15]>** an array of pointer to secret keys to add
 
 Returns **[Number][15]** a pointer to the resulting secret key
 
 ## verifyContributionShare
 
-[index.js:118-131][18]
+[index.js:115-127][18]
 
 Verifies a contribution share
 
 ### Parameters
 
--   `bls` **[Object][12]** an instance of [bls-lib][13]
+-   `bls` **[Object][12]** an instance of [bls-wasm][13]
 -   `id` **[Number][15]** a pointer to the id of the member verifiing the contribution
 -   `contribution` **[Number][15]** a pointer to the secret key contribution
 -   `vvec` **[Array][14]&lt;[Number][15]>** an array of pointers to public keys which is
@@ -76,13 +75,12 @@ Returns **[Boolean][19]**
 
 ## addVerificationVectors
 
-[index.js:138-152][20]
+[index.js:133-147][20]
 
 Adds an array of verification vectors together to produce the groups verification vector
 
 ### Parameters
 
--   `bls` **[Object][12]** an instance of [bls-lib][13]
 -   `vvecs` **[Array][14]&lt;[Array][14]&lt;[Number][15]>>** an array containing all the groups verifciation vectors
 
 [1]: #generatecontribution
@@ -105,22 +103,22 @@ Adds an array of verification vectors together to produce the groups verificatio
 
 [10]: #parameters-4
 
-[11]: https://github.com/wanderer/dkg/blob/6fff33d3e3b08ffbbfc0e3a9ef448bd8dfab6d68/index.js#L10-L41 "Source code on GitHub"
+[11]: https://gitlab.com/dark-crystal/dkg/blob/83c8081bbf39483736f3dd29c759c1f07f436332/index.js#L10-L40 "Source code on GitHub"
 
 [12]: https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Object
 
-[13]: https://github.com/wanderer/bls-lib
+[13]: https://github.com/herumi/bls-wasm
 
 [14]: https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Array
 
 [15]: https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Number
 
-[16]: https://github.com/wanderer/dkg/blob/6fff33d3e3b08ffbbfc0e3a9ef448bd8dfab6d68/index.js#L52-L92 "Source code on GitHub"
+[16]: https://gitlab.com/dark-crystal/dkg/blob/83c8081bbf39483736f3dd29c759c1f07f436332/index.js#L51-L90 "Source code on GitHub"
 
-[17]: https://github.com/wanderer/dkg/blob/6fff33d3e3b08ffbbfc0e3a9ef448bd8dfab6d68/index.js#L100-L107 "Source code on GitHub"
+[17]: https://gitlab.com/dark-crystal/dkg/blob/83c8081bbf39483736f3dd29c759c1f07f436332/index.js#L97-L104 "Source code on GitHub"
 
-[18]: https://github.com/wanderer/dkg/blob/6fff33d3e3b08ffbbfc0e3a9ef448bd8dfab6d68/index.js#L118-L131 "Source code on GitHub"
+[18]: https://gitlab.com/dark-crystal/dkg/blob/83c8081bbf39483736f3dd29c759c1f07f436332/index.js#L115-L127 "Source code on GitHub"
 
 [19]: https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Boolean
 
-[20]: https://github.com/wanderer/dkg/blob/6fff33d3e3b08ffbbfc0e3a9ef448bd8dfab6d68/index.js#L138-L152 "Source code on GitHub"
+[20]: https://gitlab.com/dark-crystal/dkg/blob/83c8081bbf39483736f3dd29c759c1f07f436332/index.js#L133-L147 "Source code on GitHub"

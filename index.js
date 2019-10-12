@@ -1,6 +1,6 @@
 /**
  * generates a members contribution to the DKG
- * @param {Object} bls - an instance of [bls-lib](https://github.com/wanderer/bls-lib)
+ * @param {Object} bls - an instance of [bls-wasm](https://github.com/herumi/bls-wasm)
  * @param {Array<Number>} ids - an array of pointers containing the ids of the members of the groups
  * @param {Number} threshold - the threshold number of members needed to sign on a message to
  * produce the groups signature
@@ -41,7 +41,7 @@ exports.generateContribution = function (bls, ids, threshold) {
 
 /**
  * generates a members contribution to the DKG, ensuring the secret is null
- * @param {Object} bls - an instance of [bls-lib](https://github.com/wanderer/bls-lib)
+ * @param {Object} bls - an instance of [bls-wasm](https://github.com/herumi/bls-wasm)
  * @param {Array<Number>} ids - an array of pointers containing the ids of the members of the groups
  * @param {Number} threshold - the threshold number of members needed to sign on a message to
  * produce the groups signature
@@ -105,7 +105,7 @@ exports.addContributionShares = function (secretKeyShares) {
 
 /**
  * Verifies a contribution share
- * @param {Object} bls - an instance of [bls-lib](https://github.com/wanderer/bls-lib)
+ * @param {Object} bls - an instance of [bls-wasm](https://github.com/herumi/bls-wasm)
  * @param {Number} id - a pointer to the id of the member verifiing the contribution
  * @param {Number} contribution - a pointer to the secret key contribution
  * @param {Array<Number>} vvec - an array of pointers to public keys which is
