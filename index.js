@@ -1,6 +1,6 @@
 /**
  * generates a members contribution to the DKG
- * @param {Object} bls - an instance of [bls-lib](https://github.com/wanderer/bls-lib)
+ * @param {Object} bls - an instance of [bls-wasm](https://github.com/herumi/bls-wasm)
  * @param {Array<Number>} ids - an array of pointers containing the ids of the members of the groups
  * @param {Number} threshold - the threshold number of members needed to sign on a message to
  * produce the groups signature
@@ -16,23 +16,22 @@ exports.generateContribution = function (bls, ids, threshold) {
   const skContribution = []
   // generate a sk and vvec
   for (let i = 0; i < threshold; i++) {
-    const sk = bls.secretKey()
-    bls.secretKeySetByCSPRNG(sk)
+    const sk = new bls.SecretKey()
+    sk.setByCSPRNG()
     svec.push(sk)
 
-    const pk = bls.publicKey()
-    bls.getPublicKey(pk, sk)
+    const pk = sk.getPublicKey()
     vvec.push(pk)
   }
 
   // generate key shares
   for (const id of ids) {
-    const sk = bls.secretKey()
-    bls.secretKeyShare(sk, svec, id)
+    const sk = new bls.SecretKey()
+    sk.share(svec, id)
     skContribution.push(sk)
   }
 
-  svec.forEach(s => bls.free(s))
+  svec.forEach(s => s.clear())
 
   return {
     verificationVector: vvec,
@@ -42,7 +41,7 @@ exports.generateContribution = function (bls, ids, threshold) {
 
 /**
  * generates a members contribution to the DKG, ensuring the secret is null
- * @param {Object} bls - an instance of [bls-lib](https://github.com/wanderer/bls-lib)
+ * @param {Object} bls - an instance of [bls-wasm](https://github.com/herumi/bls-wasm)
  * @param {Array<Number>} ids - an array of pointers containing the ids of the members of the groups
  * @param {Number} threshold - the threshold number of members needed to sign on a message to
  * produce the groups signature
@@ -58,32 +57,31 @@ exports.generateZeroContribution = function (bls, ids, threshold) {
   const skContribution = []
 
   const zeroArray = Buffer.alloc(32)
-  const zeroSK = bls.secretKeyImport(zeroArray)
+  const zeroSK = new bls.SecretKey()
+  zeroSK.deserialize(zeroArray)
   svec.push(zeroSK)
 
-  const zeroPK = bls.publicKey()
-  bls.getPublicKey(zeroPK, zeroSK)
+  const zeroPK = zeroSK.getPublicKey()
   vvec.push(zeroPK)
 
   // generate a sk and vvec
   for (let i = 1; i < threshold; i++) {
-    const sk = bls.secretKey()
-    bls.secretKeySetByCSPRNG(sk)
+    const sk = new bls.SecretKey()
+    sk.setByCSPRNG()
     svec.push(sk)
 
-    const pk = bls.publicKey()
-    bls.getPublicKey(pk, sk)
+    const pk = sk.getPublicKey()
     vvec.push(pk)
   }
 
   // generate key shares
   for (const id of ids) {
-    const sk = bls.secretKey()
-    bls.secretKeyShare(sk, svec, id)
+    const sk = new bls.SecretKey()
+    sk.share(svec, id)
     skContribution.push(sk)
   }
 
-  svec.forEach(s => bls.free(s))
+  svec.forEach(s => s.clear())
 
   return {
     verificationVector: vvec,
@@ -93,22 +91,21 @@ exports.generateZeroContribution = function (bls, ids, threshold) {
 
 /**
  * Adds secret key contribution together to produce a single secret key
- * @param {Object} bls - an instance of [bls-lib](https://github.com/wanderer/bls-lib)
  * @param {Array<Number>} secretKeyShares - an array of pointer to secret keys to add
  * @returns {Number} a pointer to the resulting secret key
  */
-exports.addContributionShares = function (bls, secretKeyShares) {
+exports.addContributionShares = function (secretKeyShares) {
   const first = secretKeyShares.pop()
   secretKeyShares.forEach(sk => {
-    bls.secretKeyAdd(first, sk)
-    bls.free(sk)
+    first.add(sk)
+    sk.clear()
   })
   return first
 }
 
 /**
  * Verifies a contribution share
- * @param {Object} bls - an instance of [bls-lib](https://github.com/wanderer/bls-lib)
+ * @param {Object} bls - an instance of [bls-wasm](https://github.com/herumi/bls-wasm)
  * @param {Number} id - a pointer to the id of the member verifiing the contribution
  * @param {Number} contribution - a pointer to the secret key contribution
  * @param {Array<Number>} vvec - an array of pointers to public keys which is
@@ -116,26 +113,24 @@ exports.addContributionShares = function (bls, secretKeyShares) {
  * @returns {Boolean}
  */
 exports.verifyContributionShare = function (bls, id, contribution, vvec) {
-  const pk1 = bls.publicKey()
-  bls.publicKeyShare(pk1, vvec, id)
+  const pk1 = new bls.PublicKey()
+  pk1.share(vvec, id)
 
-  const pk2 = bls.publicKey()
-  bls.getPublicKey(pk2, contribution)
+  const pk2 = contribution.getPublicKey()
 
-  const isEqual = bls.publicKeyIsEqual(pk1, pk2)
+  const isEqual = pk1.isEqual(pk2)
 
-  bls.free(pk1)
-  bls.free(pk2)
+  pk1.clear()
+  pk2.clear()
 
   return Boolean(isEqual)
 }
 
 /**
  * Adds an array of verification vectors together to produce the groups verification vector
- * @param {Object} bls - an instance of [bls-lib](https://github.com/wanderer/bls-lib)
  * @param {Array<Array<Number>>} vvecs - an array containing all the groups verifciation vectors
  */
-exports.addVerificationVectors = function (bls, vvecs) {
+exports.addVerificationVectors = function (vvecs) {
   const groupsVvec = []
   vvecs.forEach(vvec => {
     vvec.forEach((pk2, i) => {
@@ -143,8 +138,8 @@ exports.addVerificationVectors = function (bls, vvecs) {
       if (!pk1) {
         groupsVvec[i] = pk2
       } else {
-        bls.publicKeyAdd(pk1, pk2)
-        bls.free(pk2)
+        pk1.add(pk2)
+        pk2.clear()
       }
     })
   })

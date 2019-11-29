@@ -1,7 +1,7 @@
-const bls = require('bls-lib')
+const bls = require('bls-wasm')
 const dkg = require('./')
 
-bls.onModuleInit(() => {
+bls.init().then(() => {
   // We are going to walk through Distributed Key Generation.
   // In DKG a group of members generate a "shared secret key" that none of them
   // know individal and public key. When a threshold amount of group members agree to sign on
@@ -23,16 +23,14 @@ bls.onModuleInit(() => {
   // 5) After members receive all thier contribution shares they compute
   // their secret key for the group
 
-  bls.init()
-
   // to setup a group first we need a set a threshold. The threshold is the
   // number of group participants need to create a valid siganture for the group
   const threshold = 4
   // each member in the group needs a unique ID. What the id is doesn't matter
   // but it does need to be imported into bls-lib as a secret key
   const members = [10314, 30911, 25411, 8608, 31524, 15441, 23399].map(id => {
-    const sk = bls.secretKey()
-    bls.hashToSecretKey(sk, Buffer.from([id]))
+    const sk = new bls.SecretKey()
+    sk.setHashOf(Buffer.from([id]))
     return {
       id: sk,
       recievedShares: []
@@ -68,22 +66,21 @@ bls.onModuleInit(() => {
   // now each members adds together all received secret key contributions shares to get a
   // single secretkey share for the group used for signing message for the group
   members.forEach((member, i) => {
-    const sk = dkg.addContributionShares(bls, member.recievedShares)
+    const sk = dkg.addContributionShares(member.recievedShares)
     member.secretKeyShare = sk
   })
   console.log('-> secret shares have been generated')
 
   // Now any one can add together the all verification vectors posted by the
   // members of the group to get a single verification vector of for the group
-  const groupsVvec = dkg.addVerificationVectors(bls, vvecs)
+  const groupsVvec = dkg.addVerificationVectors(vvecs)
   console.log('-> verification vector computed')
 
   // the groups verifcation vector contains the groups public key. The group's
   // public key is the first element in the array
   const groupsPublicKey = groupsVvec[0]
 
-  const pubArray = bls.publicKeyExport(groupsPublicKey)
-  console.log('-> group public key : ', Buffer.from(pubArray).toString('hex'))
+  console.log('-> group public key : ', groupsPublicKey.serializeToHexStr())
 
   console.log('-> testing signature')
   // now we can select any 4 members to sign on a message
@@ -91,35 +88,31 @@ bls.onModuleInit(() => {
   const sigs = []
   const signersIds = []
   for (let i = 0; i < threshold; i++) {
-    const sig = bls.signature()
-    bls.sign(sig, members[i].secretKeyShare, message)
+    const sig = members[i].secretKeyShare.sign(message)
     sigs.push(sig)
     signersIds.push(members[i].id)
   }
 
   // then anyone can combine the signatures to get the groups signature
   // the resulting signature will also be the same no matter which members signed
-  const groupsSig = bls.signature()
-  bls.signatureRecover(groupsSig, sigs, signersIds)
+  const groupsSig = new bls.Signature()
+  groupsSig.recover(sigs, signersIds)
 
-  const sigArray = bls.signatureExport(groupsSig)
-  const sigBuf = Buffer.from(sigArray)
-  console.log('->    sigtest result : ', sigBuf.toString('hex'))
+  console.log('->    sigtest result : ', groupsSig.serializeToHexStr())
 
-  var verified = bls.verify(groupsSig, groupsPublicKey, message)
+  var verified = groupsPublicKey.verify(groupsSig, message)
   console.log('->    verified ?', Boolean(verified))
-  bls.free(groupsSig)
+  groupsSig.clear()
 
   console.log('-> testing individual public key derivation')
   // we can also use the groups verification vector to derive any of the members
   // public key
   const member = members[4]
-  const pk1 = bls.publicKey()
-  bls.publicKeyShare(pk1, groupsVvec, member.id)
+  const pk1 = new bls.PublicKey()
+  pk1.share(groupsVvec, member.id)
 
-  const pk2 = bls.publicKey()
-  bls.getPublicKey(pk2, member.secretKeyShare)
-  console.log('->    are the public keys equal?', Boolean(bls.publicKeyIsEqual(pk1, pk2)))
+  const pk2 = member.secretKeyShare.getPublicKey()
+  console.log('->    are the public keys equal?', Boolean(pk1.isEqual(pk2)))
 
   console.log('\nBeginning the share renewal round...')
 
@@ -155,21 +148,21 @@ bls.onModuleInit(() => {
   // now each members adds together all received secret key contributions shares to get a
   // single secretkey share for the group used for signing message for the group
   members.forEach((member, i) => {
-    const sk = dkg.addContributionShares(bls, member.recievedShares)
+    const sk = dkg.addContributionShares(member.recievedShares)
     member.secretKeyShare = sk
   })
   console.log('-> new secret shares have been generated')
 
   // Now any one can add together the all verification vectors posted by the
   // members of the group to get a single verification vector of for the group
-  const newGroupsVvec = dkg.addVerificationVectors(bls, newVvecs)
+  const newGroupsVvec = dkg.addVerificationVectors(newVvecs)
   console.log('-> verification vector computed')
 
   // the groups verifcation vector contains the groups public key. The group's
   // public key is the first element in the array
   const newGroupsPublicKey = newGroupsVvec[0]
 
-  verified = (bls.publicKeyIsEqual(newGroupsPublicKey, groupsPublicKey))
+  verified = newGroupsPublicKey.isEqual(groupsPublicKey)
   console.log('-> public key should not have changed :', (verified ? 'success' : 'failure'))
 
   console.log('-> testing signature using new shares')
@@ -177,33 +170,30 @@ bls.onModuleInit(() => {
   sigs.length = 0
   signersIds.length = 0
   for (let i = 0; i < threshold; i++) {
-    const sig = bls.signature()
-    bls.sign(sig, members[i].secretKeyShare, message)
+    const sig = members[i].secretKeyShare.sign(message)
     sigs.push(sig)
     signersIds.push(members[i].id)
   }
 
   // then anyone can combine the signatures to get the groups signature
   // the resulting signature will also be the same no matter which members signed
-  const groupsNewSig = bls.signature()
-  bls.signatureRecover(groupsNewSig, sigs, signersIds)
+  const groupsNewSig = new bls.Signature()
+  groupsNewSig.recover(sigs, signersIds)
 
-  const newSigArray = bls.signatureExport(groupsNewSig)
-  const newSigBuf = Buffer.from(newSigArray)
-  console.log('->    sigtest result : ', newSigBuf.toString('hex'))
-  console.log('->    signature comparison :', ((newSigBuf.equals(sigBuf)) ? 'success' : 'failure'))
+  console.log('->    sigtest result : ', groupsNewSig.serializeToHexStr())
+  console.log('->    signature comparison :', (groupsSig.isEqual(groupsNewSig) ? 'success' : 'failure'))
 
-  verified = bls.verify(groupsNewSig, groupsPublicKey, message)
+  verified = groupsPublicKey.verify(groupsNewSig, message)
   console.log('->    verified ?', Boolean(verified))
-  bls.free(groupsNewSig)
+  groupsNewSig.clear()
 
   // don't forget to clean up!
-  bls.free(pk1)
-  bls.free(pk2)
-  bls.freeArray(groupsVvec)
-  bls.freeArray(newGroupsVvec)
+  pk1.clear()
+  pk2.clear()
+  groupsVvec.forEach(v => v.clear())
+  newGroupsVvec.forEach(v => v.clear())
   members.forEach(m => {
-    bls.free(m.secretKeyShare)
-    bls.free(m.id)
+    m.secretKeyShare.clear()
+    m.id.clear()
   })
 })
