@@ -103,7 +103,7 @@ Adds an array of verification vectors together to produce the groups verificatio
 
 [10]: #parameters-4
 
-[11]: https://gitlab.com/dark-crystal/dkg/blob/83c8081bbf39483736f3dd29c759c1f07f436332/index.js#L10-L40 "Source code on GitHub"
+[11]: https://github.com/dfinity/dkg/blob/ec33c667b414083082e10d365ac8724296822968/index.js#L10-L40 "Source code on GitHub"
 
 [12]: https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Object
 
@@ -113,12 +113,12 @@ Adds an array of verification vectors together to produce the groups verificatio
 
 [15]: https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Number
 
-[16]: https://gitlab.com/dark-crystal/dkg/blob/83c8081bbf39483736f3dd29c759c1f07f436332/index.js#L51-L90 "Source code on GitHub"
+[16]: https://github.com/dfinity/dkg/blob/ec33c667b414083082e10d365ac8724296822968/index.js#L51-L90 "Source code on GitHub"
 
-[17]: https://gitlab.com/dark-crystal/dkg/blob/83c8081bbf39483736f3dd29c759c1f07f436332/index.js#L97-L104 "Source code on GitHub"
+[17]: https://github.com/dfinity/dkg/blob/ec33c667b414083082e10d365ac8724296822968/index.js#L97-L104 "Source code on GitHub"
 
-[18]: https://gitlab.com/dark-crystal/dkg/blob/83c8081bbf39483736f3dd29c759c1f07f436332/index.js#L115-L127 "Source code on GitHub"
+[18]: https://github.com/dfinity/dkg/blob/ec33c667b414083082e10d365ac8724296822968/index.js#L115-L127 "Source code on GitHub"
 
 [19]: https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Boolean
 
-[20]: https://gitlab.com/dark-crystal/dkg/blob/83c8081bbf39483736f3dd29c759c1f07f436332/index.js#L133-L147 "Source code on GitHub"
+[20]: https://github.com/dfinity/dkg/blob/ec33c667b414083082e10d365ac8724296822968/index.js#L133-L147 "Source code on GitHub"
